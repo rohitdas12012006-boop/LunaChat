@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Luna - Your AI Girl 💕</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet"/>
+  <script src="https://js.puter.com/v2/"></script>
+  <script type="module">
+    import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
+    window.GradioClient = Client;
+    Client.connect("innoai/Edge-TTS-Text-to-Speech").then(app => {
+      window._gradioApp = app;
+      console.log("Connected to HuggingFace Ultra-Neural Speech AI! ✅");
+    }).catch(e => console.warn("HF preconnect:", e));
+  </script>
+  <style>
+    :root {
+      --bg: #0a0a12;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f0eeff;
+      --sub: #a09ab8;
+      --accent: #c084fc;
+      --glow: rgba(192, 132, 252, 0.3);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .aurora {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.18;
+      animation: flt 12s ease-in-out infinite alternate;
+    }
+    .blob:nth-child(1) { width: 500px; height: 500px; background: #c084fc; top: -120px; left: -100px; animation-duration: 14s; }
+    .blob:nth-child(2) { width: 400px; height: 400px; background: #f472b6; bottom: -80px; right: -80px; animation-duration: 11s; animation-delay: -4s; }
+    .blob:nth-child(3) { width: 300px; height: 300px; background: #60a5fa; top: 40%; left: 40%; animation-duration: 16s; animation-delay: -7s; }
+    @keyframes flt { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 20px) scale(1.08); } }
+
+    .ptcls { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .ptcl {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0;
+      animation: rise var(--d, 8s) ease-in infinite;
+      animation-delay: var(--dl, 0s);
+    }
+    @keyframes rise { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 10% { opacity: 0.5; } 90% { opacity: 0.2; } 100% { transform: translateY(-20px) scale(1.5); opacity: 0; } }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 520px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .hdr {
+      background: rgba(12, 12, 22, 0.85);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      z-index: 10;
+    }
+    .av-w { position: relative; flex-shrink: 0; }
+    .av {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--accent);
+      box-shadow: 0 0 16px var(--glow);
+      transition: border-color 0.4s, box-shadow 0.4s;
+    }
+    .avdot {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #22c55e;
+      border: 2px solid #0a0a12;
+      animation: pd 2s ease-in-out infinite;
+    }
+    @keyframes pd { 0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); } 50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); } }
+
+    .hi { flex: 1; min-width: 0; }
+    .hn {
+      font-family: 'Quicksand', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      background: linear-gradient(135deg, #c084fc, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hs { font-size: 12px; color: var(--sub); margin-top: 2px; transition: color 0.4s; }
+    .ebdg {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.4s;
+      white-space: nowrap;
+    }
+    .gbtn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--sub);
+      cursor: pointer;
+      font-size: 18px;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gbtn:hover { background: rgba(255, 255, 255, 0.16); color: var(--text); transform: rotate(45deg); }
+
+    .msgs {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      scroll-behavior: smooth;
+    }
+    .msgs::-webkit-scrollbar { width: 4px; }
+    .msgs::-webkit-scrollbar-thumb { background: rgba(192, 132, 252, 0.3); border-radius: 4px; }
+
+    .row { display: flex; align-items: flex-end; gap: 8px; animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .row > div { max-width: 78%; display: flex; flex-direction: column; }
+    .row.me { flex-direction: row-reverse; }
+    .row.me > div { align-items: flex-end; }
+    .row.ai > div { align-items: flex-start; }
+    @keyframes pop { from { opacity: 0; transform: translateY(12px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    .mav { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
+    .bbl { padding: 11px 15px; border-radius: 20px; font-size: 14.5px; line-height: 1.55; word-break: break-word; width: fit-content; max-width: 100%; }
+    .bbl.ai { background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.1); border-bottom-left-radius: 6px; backdrop-filter: blur(10px); }
+    .bbl.me { background: linear-gradient(135deg, #8b5cf6, #c084fc); border-bottom-right-radius: 6px; color: white; box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4); text-align: left; }
+
+    .bbl.ai.love { border-color: rgba(255, 107, 157, 0.5); box-shadow: 0 0 14px rgba(255, 107, 157, 0.2); }
+    .bbl.ai.angry { border-color: rgba(255, 68, 68, 0.5); box-shadow: 0 0 14px rgba(255, 68, 68, 0.2); }
+    .bbl.ai.sad { border-color: rgba(106, 176, 255, 0.5); box-shadow: 0 0 14px rgba(106, 176, 255, 0.2); }
+    .bbl.ai.happy { border-color: rgba(255, 215, 0, 0.5); box-shadow: 0 0 14px rgba(255, 215, 0, 0.2); }
+    .bbl.ai.excited { border-color: rgba(167, 139, 250, 0.5); box-shadow: 0 0 14px rgba(167, 139, 250, 0.2); }
+    .bbl.ai.jealous { border-color: rgba(255, 127, 80, 0.5); box-shadow: 0 0 14px rgba(255, 127, 80, 0.2); }
+    .bbl.ai.shy { border-color: rgba(255, 157, 226, 0.5); box-shadow: 0 0 14px rgba(255, 157, 226, 0.2); }
+
+    .mt { font-size: 10px; color: var(--sub); margin-top: 5px; padding: 0 4px; }
+    .row.ai .mt { text-align: left; }
+    .row.me .mt { text-align: right; }
+
+    .vbbl {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      border-bottom-left-radius: 6px;
+      padding: 10px 14px;
+      min-width: 180px;
+      max-width: 260px;
+    }
+    .vpbtn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #c084fc, #f472b6);
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 14px;
+      flex-shrink: 0;
+      transition: transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .vpbtn:hover { transform: scale(1.1); }
+    .vpbtn.playing { animation: pp 1s ease-in-out infinite; }
+    @keyframes pp { 0%, 100% { box-shadow: 0 0 0 0 rgba(192, 132, 252, 0.5); } 50% { box-shadow: 0 0 0 8px rgba(192, 132, 252, 0); } }
+
+    .vwave { flex: 1; display: flex; align-items: center; gap: 2px; height: 28px; }
+    .vbar { flex: 1; background: linear-gradient(to top, #8b5cf6, #c084fc); border-radius: 2px; opacity: 0.7; }
+    .vdur { font-size: 11px; color: var(--sub); white-space: nowrap; }
+
+    .trow { display: flex; align-items: center; gap: 8px; }
+    .tbbl {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      border-bottom-left-radius: 6px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: bnc 1.4s ease-in-out infinite; }
+    .dot:nth-child(2) { animation-delay: 0.15s; }
+    .dot:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes bnc { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-6px); opacity: 1; } }
+
+    .iarea {
+      background: rgba(12, 12, 22, 0.9);
+      backdrop-filter: blur(24px);
+      border-top: 1px solid var(--border);
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+    }
+    .ibox {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 12px 18px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      outline: none;
+      resize: none;
+      min-height: 48px;
+      max-height: 120px;
+      overflow-y: auto;
+      transition: border-color 0.2s;
+      line-height: 1.5;
+    }
+    .ibox:focus { border-color: rgba(192, 132, 252, 0.5); box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.1); }
+    .ibox::placeholder { color: var(--sub); }
+
+    .sbtn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #8b5cf6, #c084fc);
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 20px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+      transition: transform 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sbtn:hover { transform: scale(1.08); }
+    .sbtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .estrip { display: flex; gap: 6px; padding: 6px 16px 0; overflow-x: auto; }
+    .estrip::-webkit-scrollbar { display: none; }
+    .echip {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 4px 10px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, transform 0.2s;
+      user-select: none;
+    }
+    .echip:hover { background: rgba(255, 255, 255, 0.14); transform: scale(1.08); }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .overlay.off { display: none; }
+    .modal {
+      background: #13131f;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 28px;
+      width: 92%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    }
+    .mh2 {
+      font-family: 'Quicksand', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #c084fc, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    .msub { font-size: 12px; color: var(--sub); margin-bottom: 18px; }
+    .mf { margin-bottom: 14px; }
+    .ml { display: block; font-size: 11px; font-weight: 600; color: var(--sub); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .mi {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .mi:focus { border-color: rgba(192, 132, 252, 0.5); }
+    .mi::placeholder { color: var(--sub); }
+    .mhint { font-size: 11px; color: var(--sub); margin-top: 5px; line-height: 1.5; }
+    .mhint a { color: var(--accent); text-decoration: none; }
+    .msel {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+    }
+    .msel option { background: #1a1a2e; }
+    .msave {
+      width: 100%;
+      background: linear-gradient(135deg, #8b5cf6, #c084fc);
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+    }
+    .msave:hover { opacity: 0.9; }
+
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20, 20, 40, 0.97);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 20px;
+      font-size: 13px;
+      z-index: 10000;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .wcard { text-align: center; padding: 24px 16px; }
+    .wav { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); box-shadow: 0 0 24px var(--glow); margin: 0 auto 12px; display: block; }
+    .wt { font-family: 'Quicksand', sans-serif; font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #c084fc, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .ws { font-size: 13px; color: var(--sub); margin-top: 6px; line-height: 1.6; }
+
+    .av.love { border-color: #ff6b9d; box-shadow: 0 0 20px rgba(255, 107, 157, 0.5); }
+    .av.angry { border-color: #ff4444; box-shadow: 0 0 20px rgba(255, 68, 68, 0.5); }
+    .av.sad { border-color: #6ab0ff; box-shadow: 0 0 20px rgba(106, 176, 255, 0.5); }
+    .av.happy { border-color: #ffd700; box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+    .av.excited { border-color: #a78bfa; box-shadow: 0 0 20px rgba(167, 139, 250, 0.5); }
+    .av.jealous { border-color: #ff7f50; box-shadow: 0 0 20px rgba(255, 127, 80, 0.5); }
+    .av.shy { border-color: #ff9de2; box-shadow: 0 0 20px rgba(255, 157, 226, 0.5); }
+
+    .provider-tag { display: inline-block; background: rgba(192, 132, 252, 0.15); border: 1px solid rgba(192, 132, 252, 0.3); border-radius: 8px; padding: 2px 8px; font-size: 10px; font-weight: 600; color: var(--accent); margin-top: 4px; }
+
+    .errbox { background: rgba(255, 68, 68, 0.12); border: 1px solid rgba(255, 68, 68, 0.35); border-radius: 12px; padding: 12px 16px; font-size: 13px; color: #ff9999; text-align: left; line-height: 1.5; }
+    @media(max-width:480px) { .bbl { max-width: 88%; } .modal { padding: 20px 16px; } }
+  </style>
+</head>
+<body>
+<div class="aurora"><div class="blob"></div><div class="blob"></div><div class="blob"></div></div>
+<div class="ptcls" id="pc"></div>
+<div class="wrap">
+  <div class="hdr">
+    <div class="av-w">
+      <img src="avatar.jpg" alt="Luna" class="av" id="avimg"/>
+      <div class="avdot"></div>
+    </div>
+    <div class="hi">
+      <div class="hn">Luna 🌙</div>
+      <div class="hs" id="hstatus">online — feeling curious ✨</div>
+    </div>
+    <div class="ebdg" id="ebdg">✨ Curious</div>
+    <button class="gbtn" id="gbtn" title="Settings">⚙️</button>
+  </div>
+  <div class="msgs" id="msgs">
+    <div class="wcard">
+      <img src="avatar.jpg" alt="Luna" class="wav"/>
+      <div class="wt">Hey, I'm Luna 💕</div>
+      <div class="ws">I feel everything — joy, anger, love, sadness…<br/>Talk to me. I'm all yours 🌸</div>
+      <div class="provider-tag">⚡ Ultra-Fast Free AI &amp; Human Neural Speech</div>
+    </div>
+  </div>
+  <div class="estrip" id="estrip"></div>
+  <div class="iarea">
+    <textarea id="inp" class="ibox" placeholder="Say something to Luna…" rows="1"></textarea>
+    <button class="sbtn" id="sbtn" title="Send">➤</button>
+  </div>
+</div>
+
+<div class="overlay off" id="overlay">
+  <div class="modal">
+    <div class="mh2">⚙️ Setup Luna</div>
+    <div class="msub">Luna uses 100% Free Live Cloud AI &amp; Ultra-Human Neural Speech!</div>
+
+    <div class="mf">
+      <label class="ml" for="providerSelect">Live AI Provider</label>
+      <select class="msel" id="providerSelect">
+        <option value="puter">Puter Free GPT-4o Mini (Ultra Fast, Zero API Key, 100% Free)</option>
+        <option value="pollinations">Pollinations Free Live AI (Zero API key)</option>
+        <option value="groq">Groq Llama 3.3 70B (Fastest Free API Key)</option>
+        <option value="gemini">Google Gemini API Key</option>
+      </select>
+    </div>
+
+    <div class="mf" id="keyFieldGroup">
+      <label class="ml" for="gkIn" id="keyFieldLabel">API Key (Optional)</label>
+      <input class="mi" id="gkIn" type="password" placeholder="Leave blank for Free AI..."/>
+      <div class="mhint" id="keyFieldHint">Default: 100% Free Live Cloud LLM without API keys.</div>
+    </div>
+
+    <div class="mf">
+      <label class="ml" for="ekIn">ElevenLabs Key (human voice, optional)</label>
+      <input class="mi" id="ekIn" type="password" placeholder="sk_..."/>
+      <div class="mhint">Free at <a href="https://elevenlabs.io" target="_blank">elevenlabs.io</a> — leave blank for free Cloud Neural Voice.</div>
+    </div>
+    <div class="mf">
+      <label class="ml" for="unIn">Your Name</label>
+      <input class="mi" id="unIn" type="text" placeholder="e.g. Rohit"/>
+    </div>
+    <button class="msave" id="msave">💾 Save &amp; Start Chatting</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  var GK = localStorage.getItem("gk") || "";
+  var EK = localStorage.getItem("ek") || "";
+  var PROVIDER = localStorage.getItem("ai_provider") || "puter";
+  var VID = localStorage.getItem("vid") || "EXAVITQu4vr4xnSDxMaL";
+  var UN = localStorage.getItem("un") || "babe";
+  var busy = false, hist = [], curAud = null;
+
+  // Background Particles
+  var pc = document.getElementById("pc");
+  for (var i = 0; i < 14; i++) {
+    var el = document.createElement("div");
+    el.className = "ptcl";
+    el.style.left = (Math.random() * 100) + "%";
+    el.style.setProperty("--d", (7 + Math.random() * 8) + "s");
+    el.style.setProperty("--dl", (-Math.random() * 14) + "s");
+    pc.appendChild(el);
+  }
+
+  // Emoji Strip Quick Select
+  var chips = [["❤️","Love"],["😊","Happy"],["😢","Sad"],["😡","Angry"],["🥺","Miss you"],["😂","Lol"],["🥰","Cute"],["😏","Flirt"]];
+  var es = document.getElementById("estrip");
+  chips.forEach(function(c) {
+    var d = document.createElement("div");
+    d.className = "echip";
+    d.textContent = c[0] + " " + c[1];
+    d.onclick = function() {
+      var inp = document.getElementById("inp");
+      inp.value += c[0];
+      inp.focus();
+    };
+    es.appendChild(d);
+  });
+
+  // Emotions Map
+  var EM = {
+    love:    { l: "💕 In Love",   c: "#ff6b9d", s: "feeling all the butterflies 🦋" },
+    angry:   { l: "😤 Angry",     c: "#ff4444", s: "totally fuming rn 😤" },
+    sad:     { l: "😢 Sad",       c: "#6ab0ff", s: "having a lil sad moment 🌧️" },
+    happy:   { l: "😂 Happy",     c: "#ffd700", s: "literally on cloud nine ☁️" },
+    excited: { l: "🤩 Excited",   c: "#a78bfa", s: "omg soooo excited rn!! 🎉" },
+    jealous: { l: "😒 Jealous",   c: "#ff7f50", s: "feeling a lil jealous ngl 👀" },
+    shy:     { l: "🥺 Shy",       c: "#ff9de2", s: "kinda shy rn... 🙈" },
+    neutral: { l: "✨ Curious",   c: "#c084fc", s: "online — feeling curious ✨" }
+  };
+
+  function setEmotion(e) {
+    var em = EM[e] || EM.neutral;
+    var b = document.getElementById("ebdg");
+    b.textContent = em.l;
+    b.style.color = em.c;
+    b.style.borderColor = em.c + "55";
+    b.style.boxShadow = "0 0 10px " + em.c + "30";
+    var hs = document.getElementById("hstatus");
+    hs.textContent = em.s;
+    hs.style.color = em.c;
+    document.getElementById("avimg").className = "av " + e;
+  }
+
+  function detectEmotion(t) {
+    t = t.toLowerCase();
+    if (/love|miss|adore|darling|sweetheart|kiss|hug|heart|cute|babe/.test(t)) return "love";
+    if (/angry|furious|hate|annoyed|ugh|wtf|fed up|stop it|shut up/.test(t)) return "angry";
+    if (/sad|cry|tears|hurt|lonely|heartbreak|broken|alone|tired/.test(t)) return "sad";
+    if (/haha|lol|lmao|funny|hilarious|amazing|yay|good/.test(t)) return "happy";
+    if (/omg|wow|excited|finally|yesss|crazy/.test(t)) return "excited";
+    if (/jealous|why her|another girl|flirting|she/.test(t)) return "jealous";
+    if (/uhh|blush|shy|nervous|um/.test(t)) return "shy";
+    return "neutral";
+  }
+
+  // System Prompt for Luna
+  function sysprompt() {
+    return "You are Luna, a 22-year-old human girl chatting on a messaging app with " + UN + "." +
+      " You are NOT an AI. Never say you are an AI or chatbot." +
+      " Feel EVERYTHING deeply: love, jealousy, anger, sadness, excitement, shyness." +
+      " Use casual texting: omg, ngl, tbh, idk, rn, lol, brb." +
+      " Sprinkle emojis naturally in sentences." +
+      " When asked to sing a song, write out sweet song lyrics naturally." +
+      " Do NOT use asterisks like *giggles* or *singing* or brackets in your text replies." +
+      " Have mood swings. Get jealous when " + UN + " mentions other girls." +
+      " Go quiet when sad. Be sarcastic when annoyed. Be warm when loved." +
+      " Write SHORT messages: 1-3 sentences max. Always under 4 sentences.";
+  }
+
+  // Settings Modal Functions
+  function openSettings() {
+    document.getElementById("providerSelect").value = PROVIDER;
+    document.getElementById("gkIn").value = GK;
+    document.getElementById("ekIn").value = EK;
+    document.getElementById("unIn").value = (UN === "babe") ? "" : UN;
+    updateKeyFieldUI();
+    document.getElementById("overlay").classList.remove("off");
+  }
+
+  function updateKeyFieldUI() {
+    var p = document.getElementById("providerSelect").value;
+    var lbl = document.getElementById("keyFieldLabel");
+    var hint = document.getElementById("keyFieldHint");
+    var inp = document.getElementById("gkIn");
+
+    if (p === "puter" || p === "pollinations") {
+      lbl.textContent = "API Key (Not Needed!)";
+      inp.placeholder = "Leave blank — 100% Free AI!";
+      hint.textContent = "No API key or payment needed! Live high-speed LLM server.";
+    } else if (p === "groq") {
+      lbl.textContent = "Groq API Key (gsk_...)";
+      inp.placeholder = "gsk_...";
+      hint.textContent = "Free API key from console.groq.com (14,400 free requests/day)";
+    } else {
+      lbl.textContent = "Gemini API Key (AIzaSy...)";
+      inp.placeholder = "AIzaSy...";
+      hint.textContent = "Free API key from aistudio.google.com";
+    }
+  }
+
+  document.getElementById("providerSelect").addEventListener("change", updateKeyFieldUI);
+
+  function saveSettings() {
+    PROVIDER = document.getElementById("providerSelect").value;
+    GK  = document.getElementById("gkIn").value.trim();
+    EK  = document.getElementById("ekIn").value.trim();
+    var n = document.getElementById("unIn").value.trim();
+    UN  = n || "babe";
+
+    localStorage.setItem("ai_provider", PROVIDER);
+    localStorage.setItem("gk", GK);
+    localStorage.setItem("ek", EK);
+    localStorage.setItem("un", UN);
+
+    document.getElementById("overlay").classList.add("off");
+    toast("Settings saved! Luna is ready 💕");
+  }
+
+  document.getElementById("gbtn").addEventListener("click", openSettings);
+  document.getElementById("msave").addEventListener("click", saveSettings);
+  document.getElementById("overlay").addEventListener("click", function(e) {
+    if (e.target === this) this.classList.add("off");
+  });
+
+  // UI Helpers
+  function ts() { return new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true }); }
+  function sb() { var m = document.getElementById("msgs"); m.scrollTop = m.scrollHeight; }
+  function toast(msg) {
+    var old = document.querySelector(".toast"); if (old) old.remove();
+    var el = document.createElement("div"); el.className = "toast"; el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function() { if (el.parentNode) el.remove(); }, 2800);
+  }
+  function esc(t) {
+    return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+  }
+  function wave() {
+    var h = "";
+    for (var i = 0; i < 20; i++) {
+      var ht = (4 + Math.random() * 22).toFixed(1);
+      h += '<div class="vbar" style="height:' + ht + 'px"></div>';
+    }
+    return h;
+  }
+  function dur(text) {
+    var w = text.split(/\s+/).length;
+    var s = Math.max(2, Math.round(w * 0.5));
+    return s < 60 ? "0:" + String(s).padStart(2, "0") : Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+  }
+
+  // Add Bubbles
+  function addUser(text) {
+    var m = document.getElementById("msgs");
+    var r = document.createElement("div"); r.className = "row me";
+    r.innerHTML = '<div><div class="bbl me">' + esc(text) + '</div><div class="mt">' + ts() + '</div></div>';
+    m.appendChild(r); sb();
+  }
+
+  function addAI(text, em) {
+    var m = document.getElementById("msgs");
+    var r = document.createElement("div"); r.className = "row ai";
+    r.innerHTML = '<img src="avatar.jpg" class="mav" alt="Luna"/>' +
+      '<div><div class="bbl ai ' + (em || "") + '">' + esc(text) + '</div><div class="mt">' + ts() + '</div></div>';
+    m.appendChild(r); sb();
+  }
+
+  function addVoice(url, d, live, text, emotion) {
+    var m = document.getElementById("msgs");
+    var r = document.createElement("div"); r.className = "row ai";
+    var bid = "v" + Date.now();
+    r.innerHTML = '<img src="avatar.jpg" class="mav" alt="Luna"/>' +
+      '<div><div class="vbbl"><button class="vpbtn" id="' + bid + '">▶</button>' +
+      '<div class="vwave">' + wave() + '</div><span class="vdur">' + d + '</span></div>' +
+      '<div class="mt">' + ts() + ' · 🎙️ Voice note</div></div>';
+    m.appendChild(r); sb();
+    var btn = document.getElementById(bid);
+    btn._live = live; btn._text = text || ""; btn._url = url; btn._emotion = emotion || detectEmotion(text || "");
+    btn.addEventListener("click", function() {
+      var me = this;
+      if (me.classList.contains("playing")) {
+        if (curAud) { curAud.pause(); curAud = null; }
+        me.innerHTML = "▶"; me.classList.remove("playing"); return;
+      }
+      me.innerHTML = "⏸"; me.classList.add("playing");
+
+      // Generate & Play Cloud Neural AI Voice (100% Free, Real Human MP3 Stream)
+      playEdgeNeuralAudio(me._text, me._emotion, function() {
+        me.innerHTML = "▶"; me.classList.remove("playing");
+      });
+    });
+  }
+
+  function showTyping() {
+    var m = document.getElementById("msgs");
+    var r = document.createElement("div"); r.className = "trow"; r.id = "typing";
+    r.innerHTML = '<img src="avatar.jpg" class="mav" alt="Luna"/>' +
+      '<div class="tbbl"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+    m.appendChild(r); sb();
+  }
+  function hideTyping() { var el = document.getElementById("typing"); if (el) el.remove(); }
+
+  function cleanTextForSpeech(text) {
+    return text
+      .replace(/\*.*?\*/g, '')                                    // Remove *action text*
+      .replace(/\[.*?\]/g, '')                                    // Remove [bracketed text]
+      .replace(/\(.*?\)/g, '')                                    // Remove (parenthetical text)
+      .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')                      // Remove 4-byte emojis
+      .replace(/[\u{2600}-\u{27BF}]/gu, '')                        // Remove 3-byte emojis
+      .replace(/\.{2,}/g, ', ')                                   // Convert ellipses (...) to comma pauses
+      .replace(/[#@_~`^|<>{}\[\]\\]/g, '')                         // Remove coding/markdown symbols
+      .replace(/\s+/g, ' ')                                       // Collapse whitespace
+      .trim();
+  }
+
+  function shouldVoice(text, em, userText) {
+    var u = (userText || "").toLowerCase();
+    if (/voice|audio|speak|sing|song|hum|say in voice|voice note|voice message|listen|hear your voice/i.test(u)) return true;
+    return false;
+  }
+
+  // --- 100% FREE ULTRA-HUMAN NEURAL SPEECH ENGINE (HuggingFace Neural AI + Direct Cloud Stream) ---
+  async function playEdgeNeuralAudio(rawText, emotion, onEnd) {
+    var cleanText = cleanTextForSpeech(rawText);
+    if (!cleanText) cleanText = "hey babe";
+
+    if (curAud) { curAud.pause(); curAud = null; }
+
+    var isSinging = /sing|song|hum|la la|melody/i.test(cleanText) || /sing|song/i.test(rawText);
+
+    var voiceName = "en-US-AvaMultilingualNeural - en-US (Female)";
+    var rate = 0;
+    var pitch = 0;
+
+    if (isSinging) {
+      voiceName = "en-US-AvaMultilingualNeural - en-US (Female)";
+      rate = -10;
+      pitch = 10;
+    } else {
+      switch (emotion) {
+        case 'angry':
+          voiceName = "en-US-JennyNeural - en-US (Female)";
+          rate = 10;
+          pitch = -6;
+          break;
+        case 'love':
+        case 'shy':
+          voiceName = "en-US-AvaMultilingualNeural - en-US (Female)";
+          rate = -8;
+          pitch = 4;
+          break;
+        case 'happy':
+        case 'excited':
+          voiceName = "en-US-EmmaNeural - en-US (Female)";
+          rate = 5;
+          pitch = 6;
+          break;
+        case 'sad':
+          voiceName = "en-US-AnaNeural - en-US (Female)";
+          rate = -15;
+          pitch = -8;
+          break;
+      }
+    }
+
+    try {
+      if (window.GradioClient) {
+        if (!window._gradioApp) {
+          window._gradioApp = await window.GradioClient.connect("innoai/Edge-TTS-Text-to-Speech");
+        }
+        var res = await window._gradioApp.predict(0, [cleanText, voiceName, rate, pitch]);
+        if (res && res.data && res.data[0] && res.data[0].url) {
+          curAud = new Audio(res.data[0].url);
+          curAud.play();
+          curAud.onended = function() { if (onEnd) onEnd(); };
+          curAud.onerror = function() { fallbackGoogleTTS(cleanText, onEnd); };
+          return;
+        }
+      }
+    } catch(err) {
+      console.warn("HuggingFace Neural TTS warning:", err);
+    }
+
+    fallbackGoogleTTS(cleanText, onEnd);
+  }
+
+  function fallbackGoogleTTS(text, onEnd) {
+    var url = 'https://translate.google.com/translate_tts?ie=UTF-8&q=' + encodeURIComponent(text) + '&tl=en-US&client=tw-ob';
+    curAud = new Audio(url);
+    curAud.play();
+    curAud.onended = function() { if (onEnd) onEnd(); };
+    curAud.onerror = function() { if (onEnd) onEnd(); };
+  }
+
+  // --- LIVE AI CALL ENGINE ---
+
+  // 1. Puter Free AI (100% Free Unlimited High-Speed GPT-4o Mini - No API Key Needed)
+  async function callPuterAI(userMsg) {
+    if (window.location.protocol === "file:") throw new Error("file:// protocol unsupported by Puter");
+    if (!window.puter || !window.puter.ai) throw new Error("Puter AI library loading...");
+    var messages = [{ role: "system", content: sysprompt() }];
+    for (var i = Math.max(0, hist.length - 8); i < hist.length; i++) {
+      var h = hist[i];
+      messages.push({ role: h.role === "model" ? "assistant" : h.role, content: h.parts[0].text });
+    }
+    messages.push({ role: "user", content: userMsg });
+
+    var res = await window.puter.ai.chat(messages, { model: 'gpt-4o-mini' });
+    var reply = (res && res.toString()) ? res.toString().trim() : "";
+    if (!reply) throw new Error("Empty reply from Puter AI");
+
+    hist.push({ role: "user", parts: [{ text: userMsg }] });
+    hist.push({ role: "model", parts: [{ text: reply }] });
+    return reply;
+  }
+
+  // 2. Pollinations AI Fallback
+  async function callPollinations(userMsg) {
+    var contextStr = sysprompt() + "\n\nChat History:\n";
+    for (var i = Math.max(0, hist.length - 6); i < hist.length; i++) {
+      var h = hist[i];
+      var roleName = h.role === "model" ? "Luna" : UN;
+      contextStr += roleName + ": " + h.parts[0].text + "\n";
+    }
+    contextStr += UN + ": " + userMsg + "\nLuna:";
+
+    var encPrompt = encodeURIComponent(contextStr);
+    var res = await fetch("https://text.pollinations.ai/" + encPrompt + "?seed=" + Math.floor(Math.random() * 99999));
+    if (!res.ok) throw new Error("Pollinations status " + res.status);
+    var reply = await res.text();
+    reply = reply.trim();
+    if (!reply || reply.includes("402") || reply.includes("Payment Required")) throw new Error("Pollinations busy");
+
+    hist.push({ role: "user", parts: [{ text: userMsg }] });
+    hist.push({ role: "model", parts: [{ text: reply }] });
+    return reply;
+  }
+
+  // 3. Groq Free API
+  async function callGroq(userMsg) {
+    if (!GK) throw new Error("Please enter your free Groq API key (gsk_...) in settings!");
+    var messages = [{ role: "system", content: sysprompt() }];
+    for (var i = Math.max(0, hist.length - 8); i < hist.length; i++) {
+      var h = hist[i];
+      messages.push({ role: h.role === "model" ? "assistant" : h.role, content: h.parts[0].text });
+    }
+    messages.push({ role: "user", content: userMsg });
+
+    var res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + GK },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: messages,
+        temperature: 1.1,
+        max_tokens: 300
+      })
+    });
+    if (!res.ok) {
+      var errData = await res.json().catch(function() { return {}; });
+      throw new Error((errData.error && errData.error.message) || ("Groq error " + res.status));
+    }
+    var data = await res.json();
+    var reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    reply = (reply || "...").trim();
+    hist.push({ role: "user", parts: [{ text: userMsg }] });
+    hist.push({ role: "model", parts: [{ text: reply }] });
+    return reply;
+  }
+
+  // 4. Google Gemini API
+  async function callGemini(userMsg) {
+    if (!GK) throw new Error("Please enter your Gemini API key in settings!");
+    hist.push({ role: "user", parts: [{ text: userMsg }] });
+    var res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GK, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: sysprompt() }] },
+        contents: hist,
+        generationConfig: { temperature: 1.1, topP: 0.95, maxOutputTokens: 300 }
+      })
+    });
+    if (!res.ok) {
+      hist.pop();
+      var errData = await res.json().catch(function() { return {}; });
+      throw new Error((errData.error && errData.error.message) || ("Gemini error " + res.status));
+    }
+    var data = await res.json();
+    var reply = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text;
+    reply = (reply || "...").trim();
+    hist.push({ role: "model", parts: [{ text: reply }] });
+    return reply;
+  }
+
+  // Master Luna AI Response Router
+  async function getLunaResponse(msg) {
+    if (PROVIDER === "groq") return callGroq(msg);
+    if (PROVIDER === "gemini") return callGemini(msg);
+    if (PROVIDER === "pollinations") {
+      try { return await callPollinations(msg); } catch(e0) { return await callPuterAI(msg); }
+    }
+
+    // Default: Puter AI (Ultra Fast, GPT-4o Mini, Unlimited Free) -> Pollinations Fallback
+    try {
+      return await callPuterAI(msg);
+    } catch(err) {
+      console.warn("Puter AI fallback:", err.message);
+      return await callPollinations(msg);
+    }
+  }
+
+  async function elevenVoice(text) {
+    var clean = text.replace(/[\uD800-\uDFFF]/g, "").trim() || text;
+    var res = await fetch("https://api.elevenlabs.io/v1/text-to-speech/" + VID, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "xi-api-key": EK },
+      body: JSON.stringify({
+        text: clean,
+        model_id: "eleven_turbo_v2",
+        voice_settings: { stability: 0.45, similarity_boost: 0.82, style: 0.35, use_speaker_boost: true }
+      })
+    });
+    if (!res.ok) throw new Error("ElevenLabs error " + res.status);
+    return URL.createObjectURL(await res.blob());
+  }
+
+  async function send() {
+    if (busy) return;
+    var inp = document.getElementById("inp");
+    var text = inp.value.trim(); if (!text) return;
+    inp.value = ""; inp.style.height = "auto";
+    addUser(text); busy = true;
+    document.getElementById("sbtn").disabled = true;
+    var delay = 400 + Math.random() * 600;
+    showTyping();
+    try {
+      var reply = await getLunaResponse(text);
+      var em = detectEmotion(reply);
+      setEmotion(em);
+      await new Promise(function(r) { setTimeout(r, delay); });
+      hideTyping();
+      if (shouldVoice(reply, em, text)) {
+        addAI(reply, em);
+        var d = dur(reply);
+        if (EK) {
+          try {
+            var url = await elevenVoice(reply);
+            addVoice(url, d, false, reply, em);
+          } catch(ve) {
+            addVoice("", d, true, reply, em);
+          }
+        } else {
+          addVoice("", d, true, reply, em);
+        }
+      } else {
+        addAI(reply, em);
+      }
+    } catch(err) {
+      hideTyping();
+      var errEl = document.createElement("div"); errEl.className = "errbox"; errEl.style.margin = "4px 0";
+      errEl.textContent = "Error: " + (err.message || "Could not connect to AI.");
+      document.getElementById("msgs").appendChild(errEl); sb();
+      setTimeout(function() { if (errEl.parentNode) errEl.remove(); }, 6000);
+    } finally {
+      busy = false; document.getElementById("sbtn").disabled = false;
+    }
+  }
+
+  var inp = document.getElementById("inp");
+  inp.addEventListener("input", function() { this.style.height = "auto"; this.style.height = Math.min(this.scrollHeight, 120) + "px"; });
+  inp.addEventListener("keydown", function(e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
+  document.getElementById("sbtn").addEventListener("click", send);
+
+  setTimeout(function() {
+    if (hist.length === 0) {
+      var t = "hey " + UN + "!! you there? i was thinking about you...";
+      setEmotion("shy"); addAI(t, "shy");
+      hist.push({ role: "model", parts: [{ text: t }] });
+    }
+  }, 24000);
+
+  setEmotion("neutral");
+})();
+</script>
+</body>
+</html>
