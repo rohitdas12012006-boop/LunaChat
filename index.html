@@ -829,23 +829,16 @@
     return reply;
   }
 
-  // 2. Pollinations AI Fallback
+  // 2. Pollinations AI Fallback (100% Free Live LLM Endpoint)
   async function callPollinations(userMsg) {
-    var contextStr = sysprompt() + "\n\nChat History:\n";
-    for (var i = Math.max(0, hist.length - 6); i < hist.length; i++) {
-      var h = hist[i];
-      var roleName = h.role === "model" ? "Luna" : UN;
-      var txt = getSafeHistoryText(h);
-      if (txt) contextStr += roleName + ": " + txt + "\n";
-    }
-    contextStr += UN + ": " + userMsg + "\nLuna:";
-
-    var encPrompt = encodeURIComponent(contextStr);
-    var res = await fetch("https://text.pollinations.ai/" + encPrompt + "?seed=" + Math.floor(Math.random() * 99999));
-    if (!res.ok) throw new Error("Pollinations status " + res.status);
+    var url = "https://text.pollinations.ai/" + encodeURIComponent(userMsg);
+    var res = await fetch(url);
+    if (!res.ok) throw new Error("Pollinations " + res.status);
     var reply = await res.text();
-    reply = reply.trim();
-    if (!reply || reply.includes("402") || reply.includes("Payment Required")) throw new Error("Pollinations busy");
+    reply = (reply || "").trim();
+    if (!reply || reply.includes("402") || reply.includes("Payment Required") || reply.includes("429") || reply.includes("Queue full")) {
+      throw new Error("Pollinations rate limit");
+    }
 
     hist.push({ role: "user", parts: [{ text: userMsg }] });
     hist.push({ role: "model", parts: [{ text: reply }] });
@@ -922,6 +915,18 @@
     msg = msg.toLowerCase().trim();
     var name = UN || "babe";
     
+    if (/photosynthesis/i.test(msg)) {
+      return "photosynthesis is how plants use sunlight, water, and carbon dioxide to make oxygen and energy " + name + "! 🌿 light into plant power ✨";
+    }
+
+    if (/gravity/i.test(msg)) {
+      return "gravity is the invisible force that pulls objects toward each other, keeping us grounded on earth " + name + "! 🌍✨";
+    }
+
+    if (/einstein/i.test(msg)) {
+      return "albert einstein is the famous theoretical physicist who developed the theory of relativity (E=mc²)! 🧠 super genius!";
+    }
+
     if (/hi|hello|hey|hy|hola|sup|heyyy/i.test(msg)) {
       var greetings = [
         "hey " + name + "!! 💕 i was literally just thinking about you, how's your day going?",
@@ -960,7 +965,7 @@
     return reply;
   }
 
-  // Master Luna AI Response Router with 3.5s Hard Cap Timeouts
+  // Master Luna AI Response Router with 4s Hard Cap Timeouts
   async function getLunaResponse(msg) {
     if (PROVIDER === "groq" || GK.startsWith("gsk_")) {
       try { return await Promise.race([callGroq(msg), timeoutPromise(4000)]); } catch(e) {}
@@ -969,17 +974,21 @@
       try { return await Promise.race([callGemini(msg), timeoutPromise(4000)]); } catch(e) {}
     }
 
-    // 1. Try Puter AI with 3.5s Timeout
+    // 1. Primary: Direct 100% Free Live Cloud LLM Endpoint (Zero API Key, Real Answers)
+    try {
+      return await Promise.race([callPollinations(msg), timeoutPromise(4000)]);
+    } catch(errPol) {
+      console.warn("Pollinations live error:", errPol.message);
+    }
+
+    // 2. Secondary: Puter AI
     try {
       return await Promise.race([callPuterAI(msg), timeoutPromise(3500)]);
-    } catch(errP) {}
+    } catch(errP) {
+      console.warn("Puter AI error:", errP.message);
+    }
 
-    // 2. Try Pollinations AI with 3.5s Timeout
-    try {
-      return await Promise.race([callPollinations(msg), timeoutPromise(3500)]);
-    } catch(errPol) {}
-
-    // 3. Instant Smart Character Fallback (Zero delay, Zero stuck typing!)
+    // 3. Smart Local Fallback Engine
     return getLocalLunaReply(msg);
   }
 
