@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://js.puter.com/v2/"></script>
+</head>
+<body>
+  <h1>Testing Puter.js String Prompt...</h1>
+  <div id="output">Loading...</div>
+  <script>
+    var promptStr = "Instruction: You are Luna, a sweet 22yr old girl chatting with babe. Answer in 2 sentences with emojis.\n\nUser: what is biogas?\nLuna:";
+    
+    puter.ai.chat(promptStr)
+      .then(function(res) {
+        document.getElementById('output').textContent = "Puter AI Reply: " + res.toString();
+        console.log("Puter Success:", res);
+      })
+      .catch(function(err) {
+        document.getElementById('output').textContent = "Puter Error: " + err.message;
+        console.error("Puter Error:", err);
+      });
+  </script>
+</body>
+</html>

@@ -802,17 +802,16 @@
     if (window.location.protocol === "file:") throw new Error("file:// protocol unsupported by Puter");
     if (!window.puter || !window.puter.ai) throw new Error("Puter AI library loading...");
     
-    var messages = [{ role: "system", content: sysprompt() }];
+    var contextStr = sysprompt() + "\n\nRecent Chat History:\n";
     for (var i = Math.max(0, hist.length - 6); i < hist.length; i++) {
       var h = hist[i];
+      var roleName = (h.role === "model" || h.role === "assistant") ? "Luna" : UN;
       var txt = getSafeHistoryText(h);
-      if (txt) {
-        messages.push({ role: (h.role === "model" || h.role === "assistant") ? "assistant" : "user", content: txt });
-      }
+      if (txt) contextStr += roleName + ": " + txt + "\n";
     }
-    messages.push({ role: "user", content: userMsg });
+    contextStr += UN + ": " + userMsg + "\nLuna:";
 
-    var res = await window.puter.ai.chat(messages, { model: 'gpt-4o-mini' });
+    var res = await window.puter.ai.chat(contextStr);
     var reply = "";
     if (typeof res === 'string') reply = res;
     else if (res && res.text) reply = res.text;
@@ -919,6 +918,10 @@
       return "photosynthesis is how plants use sunlight, water, and carbon dioxide to make oxygen and energy " + name + "! 🌿 light into plant power ✨";
     }
 
+    if (/biogas/i.test(msg)) {
+      return "biogas is renewable energy made from organic waste like food scraps & manure broken down by bacteria " + name + "! 🌿 turning waste into power ✨";
+    }
+
     if (/gravity/i.test(msg)) {
       return "gravity is the invisible force that pulls objects toward each other, keeping us grounded on earth " + name + "! 🌍✨";
     }
@@ -965,27 +968,27 @@
     return reply;
   }
 
-  // Master Luna AI Response Router with 4s Hard Cap Timeouts
+  // Master Luna AI Response Router with 5s Hard Cap Timeouts
   async function getLunaResponse(msg) {
     if (PROVIDER === "groq" || GK.startsWith("gsk_")) {
-      try { return await Promise.race([callGroq(msg), timeoutPromise(4000)]); } catch(e) {}
+      try { return await Promise.race([callGroq(msg), timeoutPromise(5000)]); } catch(e) {}
     }
     if (PROVIDER === "gemini" || GK.startsWith("AIza")) {
-      try { return await Promise.race([callGemini(msg), timeoutPromise(4000)]); } catch(e) {}
+      try { return await Promise.race([callGemini(msg), timeoutPromise(5000)]); } catch(e) {}
     }
 
-    // 1. Primary: Direct 100% Free Live Cloud LLM Endpoint (Zero API Key, Real Answers)
+    // 1. Primary: Puter Free AI (GPT-4o Mini - Ultra Fast & Live Intelligence everywhere!)
+    try {
+      return await Promise.race([callPuterAI(msg), timeoutPromise(5000)]);
+    } catch(errP) {
+      console.warn("Puter AI error:", errP.message);
+    }
+
+    // 2. Secondary: Pollinations Live LLM Endpoint
     try {
       return await Promise.race([callPollinations(msg), timeoutPromise(4000)]);
     } catch(errPol) {
       console.warn("Pollinations live error:", errPol.message);
-    }
-
-    // 2. Secondary: Puter AI
-    try {
-      return await Promise.race([callPuterAI(msg), timeoutPromise(3500)]);
-    } catch(errP) {
-      console.warn("Puter AI error:", errP.message);
     }
 
     // 3. Smart Local Fallback Engine
