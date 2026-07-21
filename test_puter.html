@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://js.puter.com/v2/"></script>
+</head>
+<body>
+  <h1>Testing Puter.js Free AI...</h1>
+  <div id="output">Loading...</div>
+  <script>
+    puter.ai.chat("You are Luna, a sweet 22-year-old girl.", "hey babe!! you there?")
+      .then(function(res) {
+        document.getElementById('output').textContent = "Puter AI Result: " + res.toString();
+        console.log("Puter AI Success:", res);
+      })
+      .catch(function(err) {
+        document.getElementById('output').textContent = "Error: " + err.message;
+        console.error("Puter AI Error:", err);
+      });
+  </script>
+</body>
+</html>
