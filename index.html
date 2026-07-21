@@ -683,13 +683,16 @@
   }
 
   function showTyping() {
+    hideTyping();
     var m = document.getElementById("msgs");
     var r = document.createElement("div"); r.className = "trow"; r.id = "typing";
     r.innerHTML = '<img src="avatar.jpg" class="mav" alt="Luna"/>' +
       '<div class="tbbl"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
     m.appendChild(r); sb();
   }
-  function hideTyping() { var el = document.getElementById("typing"); if (el) el.remove(); }
+  function hideTyping() {
+    document.querySelectorAll("#typing").forEach(function(el) { el.remove(); });
+  }
 
   function cleanTextForSpeech(text) {
     return text
@@ -916,14 +919,17 @@
     return URL.createObjectURL(await res.blob());
   }
 
+  var greetingTimer = null;
+
   async function send() {
     if (busy) return;
+    if (greetingTimer) { clearTimeout(greetingTimer); greetingTimer = null; }
     var inp = document.getElementById("inp");
     var text = inp.value.trim(); if (!text) return;
     inp.value = ""; inp.style.height = "auto";
     addUser(text); busy = true;
     document.getElementById("sbtn").disabled = true;
-    var delay = 400 + Math.random() * 600;
+    var delay = 300 + Math.random() * 400;
     showTyping();
     try {
       var reply = await getLunaResponse(text);
@@ -952,9 +958,11 @@
       var errEl = document.createElement("div"); errEl.className = "errbox"; errEl.style.margin = "4px 0";
       errEl.textContent = "Error: " + (err.message || "Could not connect to AI.");
       document.getElementById("msgs").appendChild(errEl); sb();
-      setTimeout(function() { if (errEl.parentNode) errEl.remove(); }, 6000);
+      setTimeout(function() { if (errEl.parentNode) errEl.remove(); }, 5000);
     } finally {
-      busy = false; document.getElementById("sbtn").disabled = false;
+      hideTyping();
+      busy = false;
+      document.getElementById("sbtn").disabled = false;
     }
   }
 
@@ -963,8 +971,8 @@
   inp.addEventListener("keydown", function(e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
   document.getElementById("sbtn").addEventListener("click", send);
 
-  setTimeout(function() {
-    if (hist.length === 0) {
+  greetingTimer = setTimeout(function() {
+    if (hist.length === 0 && !busy) {
       var t = "hey " + UN + "!! you there? i was thinking about you...";
       setEmotion("shy"); addAI(t, "shy");
       hist.push({ role: "model", parts: [{ text: t }] });
