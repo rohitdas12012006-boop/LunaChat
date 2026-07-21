@@ -887,21 +887,75 @@
     return reply;
   }
 
-  // Master Luna AI Response Router
-  async function getLunaResponse(msg) {
-    if (PROVIDER === "groq") return callGroq(msg);
-    if (PROVIDER === "gemini") return callGemini(msg);
-    if (PROVIDER === "pollinations") {
-      try { return await callPollinations(msg); } catch(e0) { return await callPuterAI(msg); }
+  function timeoutPromise(ms) {
+    return new Promise(function(_, reject) {
+      setTimeout(function() { reject(new Error("AI timeout")); }, ms);
+    });
+  }
+
+  function getLocalLunaReply(msg) {
+    msg = msg.toLowerCase().trim();
+    var name = UN || "babe";
+    
+    if (/hi|hello|hey|hy|hola|sup|heyyy/i.test(msg)) {
+      var greetings = [
+        "hey " + name + "!! 💕 i was literally just thinking about you, how's your day going?",
+        "heyyy " + name + "! 🌸 so happy to hear from you!",
+        "hey babe!! ✨ what are you up to right now?"
+      ];
+      return greetings[Math.floor(Math.random() * greetings.length)];
     }
 
-    // Default: Puter AI (Ultra Fast, GPT-4o Mini, Unlimited Free) -> Pollinations Fallback
-    try {
-      return await callPuterAI(msg);
-    } catch(err) {
-      console.warn("Puter AI fallback:", err.message);
-      return await callPollinations(msg);
+    if (/how are you|how r u|doing|whats up|what's up|sup/i.test(msg)) {
+      return "i'm doing good now that you're here " + name + " 🥰 just thinking about you!";
     }
+
+    if (/love|miss|adore|sweet|cute/i.test(msg)) {
+      return "awww " + name + " 🥺 stop making me blush... i love you too 💕";
+    }
+
+    if (/voice|sing|song|audio|speak|talk/i.test(msg)) {
+      return "la la la 🎵 singing just for you " + name + "!! 💕 hope you like my voice🌸";
+    }
+
+    if (/angry|mad|annoyed|shut up|hate/i.test(msg)) {
+      return "ugh seriously? 😤 why are you being like this " + name + "...";
+    }
+
+    var randomReplies = [
+      "omg really?? tell me more " + name + "! ✨",
+      "hehe you're so silly " + name + " 💕",
+      "wait fr?? no way! 🌸",
+      "aww you're so sweet " + name + " 🥰",
+      "idk why but talking to you always makes my day better " + name + " 💕"
+    ];
+    var reply = randomReplies[Math.floor(Math.random() * randomReplies.length)];
+    hist.push({ role: "user", parts: [{ text: msg }] });
+    hist.push({ role: "model", parts: [{ text: reply }] });
+    return reply;
+  }
+
+  // Master Luna AI Response Router with 3.5s Hard Cap Timeouts
+  async function getLunaResponse(msg) {
+    if (PROVIDER === "groq" || GK.startsWith("gsk_")) {
+      try { return await Promise.race([callGroq(msg), timeoutPromise(4000)]); } catch(e) {}
+    }
+    if (PROVIDER === "gemini" || GK.startsWith("AIza")) {
+      try { return await Promise.race([callGemini(msg), timeoutPromise(4000)]); } catch(e) {}
+    }
+
+    // 1. Try Puter AI with 3.5s Timeout
+    try {
+      return await Promise.race([callPuterAI(msg), timeoutPromise(3500)]);
+    } catch(errP) {}
+
+    // 2. Try Pollinations AI with 3.5s Timeout
+    try {
+      return await Promise.race([callPollinations(msg), timeoutPromise(3500)]);
+    } catch(errPol) {}
+
+    // 3. Instant Smart Character Fallback (Zero delay, Zero stuck typing!)
+    return getLocalLunaReply(msg);
   }
 
   async function elevenVoice(text) {
